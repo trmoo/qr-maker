@@ -1,0 +1,254 @@
+/*!
+ * QR 코드 만들기 — 모양새
+ * © 2026 티쳐무 · 모든 권리 보유. 학교 수업 목적으로만 이용해 주세요.
+ *
+ * 교실 TV·전자칠판에서 보이도록 글꼴과 단추를 크게 둔다.
+ */
+:root {
+  --brand: #1d4ed8;
+  --brand-dark: #1e3a8a;
+  --ink: #111827;
+  --muted: #5b6474;
+  --line: #d9dee8;
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Pretendard", "맑은 고딕", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+#app { max-width: 1320px; margin: 0 auto; padding: 0 16px 60px; }
+
+/* ───────── 머리말 ───────── */
+.top { padding: 28px 4px 10px; }
+.top h1 { font-size: 2.1rem; margin: 0 0 6px; letter-spacing: -0.5px; }
+.top .sub { margin: 0; color: var(--muted); font-size: 1rem; }
+
+/* ───────── 탭 ───────── */
+.tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 20px; }
+.tab {
+  font: inherit; font-weight: 700; font-size: 1.05rem;
+  padding: 12px 22px; border: 2px solid var(--line); border-radius: 999px;
+  background: var(--card); color: var(--muted); cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.tab:hover { border-color: var(--brand); color: var(--brand); }
+.tab.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+/* ───────── 알약 단추 ───────── */
+.pills { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 14px; }
+.pill {
+  font: inherit; white-space: nowrap; padding: 9px 18px; border-radius: 999px;
+  border: 2px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer;
+}
+.pill:hover { border-color: var(--brand); color: var(--brand); }
+.pill.on { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 700; }
+
+/* ───────── 칸 ───────── */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+@media (max-width: 1000px) { .cols { grid-template-columns: 1fr; } }
+
+.pane {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; margin-bottom: 18px;
+}
+.pane h2 { font-size: 1.35rem; margin: 0 0 14px; }
+.pane h3 { font-size: 1.1rem; margin: 0 0 10px; }
+
+/* ───────── 종류 고르기 ───────── */
+.typerow { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; margin-bottom: 18px; }
+.typebtn {
+  font: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 6px; border: 2px solid var(--line); border-radius: 12px;
+  background: var(--card); color: var(--muted); cursor: pointer; font-weight: 600;
+}
+.typebtn .ti { font-size: 1.6rem; line-height: 1.2; }
+.typebtn:hover { border-color: var(--brand); color: var(--brand); }
+.typebtn.on { border-color: var(--brand); background: #eff4ff; color: var(--brand-dark); }
+
+.typehint { margin: 0 0 14px; color: var(--muted); font-size: .95rem; }
+
+/* ───────── 입력 ───────── */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-weight: 700; margin-bottom: 5px; font-size: .95rem; }
+.req { color: var(--bad); }
+input[type="text"], textarea, select {
+  width: 100%; font: inherit; padding: 11px 13px;
+  border: 2px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink);
+}
+input[type="text"].big, .samplerow input.big { font-size: 1.15rem; }
+input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--brand); }
+textarea { resize: vertical; }
+input[type="range"] { width: 100%; max-width: 260px; accent-color: var(--brand); }
+input[type="color"] { width: 54px; height: 38px; padding: 2px; border: 2px solid var(--line); border-radius: 8px; background: #fff; }
+input[type="file"] { font: inherit; font-size: .9rem; }
+.check { display: flex; align-items: center; gap: 8px; margin: 8px 0; cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: var(--brand); }
+
+/* ───────── 단추 ───────── */
+.btn {
+  font: inherit; font-weight: 700; padding: 12px 20px; border-radius: 10px;
+  border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.small { padding: 6px 12px; font-size: .88rem; font-weight: 600; }
+.btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+
+/* ───────── QR 미리보기 ───────── */
+.qr-wrap {
+  display: flex; align-items: center; justify-content: center;
+  background: repeating-conic-gradient(#f1f3f8 0% 25%, #ffffff 0% 50%) 0 0/20px 20px;
+  border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-height: 300px;
+}
+.qr-wrap.empty { min-height: 300px; }
+.qr-canvas { width: 100%; max-width: 420px; height: auto; display: block; image-rendering: pixelated; }
+.big-canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; border-radius: 8px; }
+.big-canvas.clickable { cursor: crosshair; }
+.mini-canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; }
+
+/* ───────── 알림 상자 ───────── */
+.msgs:not(:empty) { margin-top: 6px; }
+.note {
+  border-radius: 10px; padding: 11px 14px; margin: 8px 0; font-size: .95rem;
+  border-left: 5px solid var(--line); background: #f8fafc;
+}
+.note.info { border-color: var(--brand); background: #eff4ff; }
+.note.warn { border-color: var(--warn); background: #fffbeb; }
+.note.bad { border-color: var(--bad); background: #fef2f2; }
+.hint { color: var(--muted); font-size: .9rem; margin: 6px 0 0; }
+.muted { color: var(--muted); }
+
+/* ───────── 표 ───────── */
+table.kv { width: 100%; border-collapse: collapse; font-size: .95rem; }
+table.kv th, table.kv td { text-align: left; padding: 7px 4px; border-bottom: 1px solid #eef1f6; vertical-align: top; }
+table.kv th { width: 38%; color: var(--muted); font-weight: 600; }
+table.kv.small { font-size: .85rem; }
+table.kv.small th { width: 55%; }
+table.kv tr.total th, table.kv tr.total td { font-weight: 800; color: var(--ink); border-bottom: none; }
+
+details.payload { margin-top: 14px; }
+details.payload summary { cursor: pointer; font-weight: 700; color: var(--brand); }
+details.payload pre, pre.bits {
+  background: #0f172a; color: #e6edf7; padding: 12px 14px; border-radius: 10px;
+  overflow-x: auto; font-size: .85rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+  font-family: "Consolas", "D2Coding", ui-monospace, monospace;
+}
+
+/* ───────── 스캔 안내 ───────── */
+.advice h3 { margin: 16px 0 8px; }
+.advice ul { margin: 0; padding-left: 20px; font-size: .95rem; }
+.advice li { margin-bottom: 6px; }
+.adv-good { color: var(--good); }
+.adv-warn { color: var(--warn); }
+.adv-bad { color: var(--bad); font-weight: 600; }
+
+/* ───────── 꾸미기 ───────── */
+.designbox {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; margin-bottom: 18px;
+}
+.dgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 24px; }
+.dcell > label { display: block; font-weight: 700; margin-bottom: 8px; font-size: .95rem; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.segbtn {
+  font: inherit; font-weight: 700; padding: 8px 14px; border-radius: 9px;
+  border: 2px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.2;
+}
+.segbtn small { font-size: .7rem; font-weight: 500; }
+.segbtn:hover { border-color: var(--brand); color: var(--brand); }
+.segbtn.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.preset {
+  font: inherit; font-size: .82rem; font-weight: 700; padding: 7px 12px;
+  border: 2px solid; border-radius: 8px; cursor: pointer;
+}
+.preset.on { outline: 3px solid var(--brand); outline-offset: 2px; }
+.inline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .9rem; }
+
+/* ───────── 원리 탭 ───────── */
+.samplerow {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 18px; margin-bottom: 16px;
+}
+.samplerow label { font-weight: 700; font-size: .92rem; white-space: nowrap; }
+.samplerow input { flex: 1 1 320px; }
+.samplerow select { flex: 0 0 130px; width: auto; }
+
+.legend { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.legend-item {
+  font: inherit; display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 7px 10px; border: 2px solid transparent; border-radius: 9px;
+  background: #f8fafc; cursor: pointer; text-align: left;
+}
+.legend-item:hover { background: #eff4ff; }
+.legend-item.on { border-color: var(--brand); background: #eff4ff; }
+.swatch { width: 18px; height: 18px; border-radius: 4px; flex: 0 0 auto; border: 1px solid rgba(0,0,0,.15); }
+.lname { flex: 1; font-size: .95rem; font-weight: 600; }
+.lcount { color: var(--muted); font-size: .85rem; }
+
+.verdict { border-radius: 12px; padding: 14px 16px; font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
+.verdict small { display: block; font-size: .85rem; font-weight: 500; margin-top: 5px; line-height: 1.5; }
+.verdict.good { background: #ecfdf5; color: var(--good); border: 2px solid #86efac; }
+.verdict.bad { background: #fef2f2; color: var(--bad); border: 2px solid #fca5a5; }
+.blocks { display: flex; flex-direction: column; gap: 5px; margin: 14px 0; max-height: 320px; overflow-y: auto; }
+.blockbar { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+.bname { flex: 0 0 76px; color: var(--muted); }
+.btrack { flex: 1; height: 14px; background: #eef1f6; border-radius: 7px; overflow: hidden; }
+.bfill { height: 100%; background: var(--good); border-radius: 7px; transition: width .15s; }
+.bfill.over { background: var(--bad); }
+.bnum { flex: 0 0 56px; text-align: right; font-variant-numeric: tabular-nums; }
+.bnum.over { color: var(--bad); font-weight: 800; }
+
+.maskgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.maskcard { background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 12px; }
+.maskcard.best { border-color: var(--brand); box-shadow: 0 0 0 3px #dbeafe; }
+.mhead { display: flex; align-items: center; justify-content: space-between; font-weight: 800; margin-bottom: 8px; }
+.badge { background: var(--brand); color: #fff; font-size: .72rem; padding: 2px 8px; border-radius: 999px; }
+
+.pane.step h3 { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
+.stepno {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%; background: var(--brand); color: #fff;
+  font-size: .95rem; flex: 0 0 auto;
+}
+.svgbox { max-width: 320px; margin-top: 12px; }
+.svgbox svg { width: 100%; height: auto; display: block; }
+
+/* ───────── 대화상자 ───────── */
+dialog.modal { border: none; background: transparent; padding: 0; max-width: 92vw; }
+dialog.modal::backdrop { background: rgba(17, 24, 39, .55); }
+.modal-box { background: var(--card); border-radius: var(--radius); padding: 22px 26px; min-width: 300px; max-width: 540px; }
+.modal-box h3 { margin: 0 0 10px; font-size: 1.15rem; }
+.modal-body p { margin: 0 0 8px; }
+.modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+/* ───────── 꼬리말 ───────── */
+.foot { margin-top: 30px; padding: 18px 4px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+.foot p { margin: 0 0 4px; }
+
+@media print {
+  .tabs, .pills, .btnrow, .designbox, .foot, .samplerow { display: none !important; }
+}
+
+/* 아직 만들 수 없을 때 — 앞서 만든 QR 코드를 지우고 안내만 보인다 */
+.empty-note { display: none; text-align: center; }
+.qr-wrap.empty .qr-canvas { display: none; }
+.qr-wrap.empty .empty-note { display: block; }

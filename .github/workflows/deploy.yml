@@ -1,0 +1,58 @@
+name: 빌드하고 GitHub Pages 에 올리기
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # QR 인코더 시험(기준 520 · 교차 84 · 규격 예제 …) — 깨지면 배포도 멈춘다
+      - run: npm test
+      # 화면 파일은 시험이 부르지 않으므로 따로 전수 검사하고, 앱을 한 번 그려 본다
+      - run: npm run check:syntax
+      # 빌드 + 빌드 결과 점검(크기·저작권·바깥 자원 0개·빌드본 실행)
+      - run: npm run build
+      # ⚠ 셸 변수 이름은 반드시 ASCII — 한글 이름을 쓰면 bash 가 command not found 로 죽는다
+      - name: 배너와 크기 다시 확인
+        run: |
+          size=$(stat -c%s dist/index.html)
+          echo "dist/index.html = ${size} bytes"
+          if [ "$size" -lt 40000 ]; then echo "너무 작다 — 빌드가 제대로 안 됐다"; exit 1; fi
+          marks=$(grep -o 티쳐무 dist/index.html | wc -l)
+          echo "「티쳐무」 ${marks}번"
+          if [ "$marks" -lt 5 ]; then echo "저작권 표시가 모자란다"; exit 1; fi
+          # ⚠ 배너는 둘째 줄로 확인한다 — 첫 줄 `/*!` 만 보면 CSS 머리 주석에 걸려 늘 통과한다
+          grep -q '학교 수업 목적으로만 이용해 주세요. 무단 배포 및 상업적 이용을 금합니다.' dist/index.html \
+            || { echo "스크립트 /*! 배너의 둘째 줄이 없다 — vite.config.js 의 postBanner 를 볼 것"; exit 1; }
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

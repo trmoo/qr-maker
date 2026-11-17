@@ -1,0 +1,24 @@
+{
+  "name": "qr-maker",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "QR 코드 만들기 — 링크·텍스트·Wi-Fi·연락처를 QR 코드로. 외부 라이브러리 없이 QR 인코더를 직접 구현했다.",
+  "license": "UNLICENSED",
+  "author": "티쳐무",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build && node tools/check-dist.mjs",
+    "preview": "vite preview",
+    "test": "node test/run.mjs",
+    "check:syntax": "node tools/check-syntax.mjs",
+    "golden": "python tools/golden.py",
+    "check:decode": "node tools/decode-check.mjs && python tools/decode.py",
+    "check": "npm run check:syntax && npm test"
+  },
+  "devDependencies": {
+    "vite": "8.3.8",
+    "vite-plugin-singlefile": "2.3.4"
+  }
+}
