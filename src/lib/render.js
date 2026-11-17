@@ -33,9 +33,17 @@ export function layoutFor(qr, opt = {}) {
   return { margin, total, cell, px: cell * total };
 }
 
-function roundRectPath(ctx, x, y, w, h, r) {
+/**
+ * 둥근 네모 한 조각을 「지금 그리는 길」에 **덧붙인다.**
+ *
+ * ⚠⚠ 여기서 `ctx.beginPath()` 를 부르면 안 된다. 예전에 그렇게 되어 있어서,
+ *    위치 찾기 무늬의 겉테두리(7×7)를 넣고 속(5×5)을 넣는 순간 **앞의 것이 지워져**
+ *    `fill('evenodd')` 이 속만 통째로 칠했다. 그래서 세 귀퉁이 무늬가 「테두리 + 흰 틈 +
+ *    가운데 네모」가 아니라 **검은 5×5 덩어리** 하나가 되어, 휴대폰이 QR 코드를
+ *    아예 찾지 못했다(2026-11-17). 길은 부르는 쪽에서 `beginPath()` 로 시작한다.
+ */
+function addRoundRect(ctx, x, y, w, h, r) {
   const rr = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
   ctx.moveTo(x + rr, y);
   ctx.lineTo(x + w - rr, y);
   ctx.arcTo(x + w, y, x + w, y + rr, rr);
@@ -46,6 +54,13 @@ function roundRectPath(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y + rr);
   ctx.arcTo(x, y, x + rr, y, rr);
   ctx.closePath();
+}
+
+/** 둥근 네모 하나를 바로 칠한다 (길을 새로 시작한다) */
+function fillRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  addRoundRect(ctx, x, y, w, h, r);
+  ctx.fill();
 }
 
 /** 위치 찾기 무늬인가 (세 귀퉁이) */
@@ -79,16 +94,17 @@ export function drawCanvas(canvas, qr, opt = {}) {
 
   // ① 위치 찾기 무늬 — 모양을 바꾸지 않고 통째로 그린다
   const finderOrigins = [[0, 0], [0, qr.size - 7], [qr.size - 7, 0]];
-  const ringRadius = shape.radius > 0 ? cell * 1.6 : 0;
+  const ringRadius = shape.radius > 0 ? cell * RING_OUTER : 0;
   for (const [oy, ox] of finderOrigins) {
-    // 겉테두리 (7×7 가운데 1칸 두께)
-    roundRectPath(ctx, at(ox), at(oy), cell * 7, cell * 7, ringRadius);
-    roundRectPath(ctx, at(ox) + cell, at(oy) + cell, cell * 5, cell * 5, Math.max(0, ringRadius - cell));
+    // 겉테두리 (7×7 가운데 1칸 두께) — 길 하나에 네모 둘을 넣고 짝홀(evenodd)로 칠해
+    // 가운데가 뚫린 고리가 된다. 그래서 beginPath 는 **여기서 한 번만** 부른다.
+    ctx.beginPath();
+    addRoundRect(ctx, at(ox), at(oy), cell * 7, cell * 7, ringRadius);
+    addRoundRect(ctx, at(ox) + cell, at(oy) + cell, cell * 5, cell * 5, Math.max(0, ringRadius - cell));
     ctx.fill('evenodd');
     // 가운데 3×3
-    roundRectPath(ctx, at(ox) + cell * 2, at(oy) + cell * 2, cell * 3, cell * 3,
+    fillRoundRect(ctx, at(ox) + cell * 2, at(oy) + cell * 2, cell * 3, cell * 3,
       shape.radius > 0 ? cell * 0.7 : 0);
-    ctx.fill();
   }
 
   // ② 나머지 모듈
@@ -99,7 +115,7 @@ export function drawCanvas(canvas, qr, opt = {}) {
       const keepSquare = qr.part[y][x] === PART.ALIGNMENT || qr.part[y][x] === PART.TIMING;
       const r = keepSquare ? 0 : shape.radius * cell;
       if (r <= 0) ctx.fillRect(at(x), at(y), cell, cell);
-      else { roundRectPath(ctx, at(x), at(y), cell, cell, r); ctx.fill(); }
+      else fillRoundRect(ctx, at(x), at(y), cell, cell, r);
     }
   }
 
@@ -110,8 +126,7 @@ export function drawCanvas(canvas, qr, opt = {}) {
     const pad = Math.max(cell, Math.round(box * 0.08));
     const cx = (px - box) / 2;
     ctx.fillStyle = opt.transparent ? '#ffffff' : bg;
-    roundRectPath(ctx, cx - pad, cx - pad, box + pad * 2, box + pad * 2, cell * 1.2);
-    ctx.fill();
+    fillRoundRect(ctx, cx - pad, cx - pad, box + pad * 2, box + pad * 2, cell * 1.2);
     try {
       ctx.drawImage(opt.logo, cx, cx, box, box);
     } catch { /* 그림을 못 그려도 QR 코드는 남는다 */ }
@@ -127,6 +142,43 @@ export function logoCoverage(qr, logoRatio) {
   const covered = side * side;
   const dataModules = qr.size * qr.size;
   return { side, covered, percent: (covered / dataModules) * 100 };
+}
+
+/**
+ * 둥근 모양일 때 위치 찾기 무늬의 겉테두리 — SVG 에서는 **테두리선(stroke)** 으로 그린다.
+ *
+ * ⚠⚠ 선은 길의 **가운데**를 따라 두껍게 그려진다. 그래서 7×7 겉면(0~7)을 그대로 따라
+ *    그리면 1칸 두께 선의 절반이 밖(분리 여백)으로 삐져나가고 안쪽은 반 칸만 덮어,
+ *    고리 전체가 **반 칸 밀린다.** 예전에 그렇게 되어 있어서 둥근 네모·동그라미로
+ *    내려받은 SVG 는 휴대폰이 잘 못 읽었다(2026-11-17 고침, 어긋난 칸 40개).
+ *    반 칸(`inset`) 들여 그려야 고리가 겉 한 줄에 제자리로 앉는다.
+ *
+ * `RING` 은 시험도 함께 쓴다 — 여기 값을 고치면 시험이 같은 값으로 다시 잰다.
+ */
+export const RING = { inset: 0.5, radius: 0.5, width: 1 };
+
+/**
+ * ⚠ 모서리를 **많이** 둥글릴 수 없다. 고리의 네 귀퉁이 칸은 가운데 점이 바깥 가장자리에
+ *   바싹 붙어 있어서, 둥근 정도를 키우면 그 칸이 반만 칠해진 회색이 된다(휴대폰은 칸의
+ *   가운데를 본다). 겉 모서리 반지름 1칸(= inset 0.5 + radius 0.5)이 한계선이고,
+ *   캔버스 쪽 `RING_OUTER` 도 같은 값으로 맞춰 두었다. 그림이 예뻐지는 대신
+ *   안 읽히면 안 되므로 이 값을 키우지 말 것.
+ */
+export const RING_OUTER = 1;
+
+const n3 = (v) => +v.toFixed(3);
+
+function finderRingPath(X, Y) {
+  const { inset: i, radius: r } = RING;
+  const run = n3(7 - i * 2 - r * 2);   // 모서리를 뺀 곧은 구간
+  return `M${n3(X + i)} ${n3(Y + i + r)}`
+    + `a${r} ${r} 0 0 1 ${r}-${r}`
+    + `h${run}`
+    + `a${r} ${r} 0 0 1 ${r} ${r}`
+    + `v${run}`
+    + `a${r} ${r} 0 0 1-${r} ${r}`
+    + `h-${run}`
+    + `a${r} ${r} 0 0 1-${r}-${r}z`;
 }
 
 /** SVG 글자로 만든다 (인쇄·확대에 좋다) */
@@ -149,7 +201,7 @@ export function toSVG(qr, opt = {}) {
   for (const [oy, ox] of finderOrigins) {
     const X = ox + margin, Y = oy + margin;
     if (shape.radius > 0) {
-      parts.push(`<path d="M${X} ${Y + 1.6}a1.6 1.6 0 0 1 1.6-1.6h3.8a1.6 1.6 0 0 1 1.6 1.6v3.8a1.6 1.6 0 0 1-1.6 1.6h-3.8a1.6 1.6 0 0 1-1.6-1.6z" fill="none" stroke="${fg}" stroke-width="1"/>`);
+      parts.push(`<path d="${finderRingPath(X, Y)}" fill="none" stroke="${fg}" stroke-width="${RING.width}"/>`);
       parts.push(`<rect x="${X + 2}" y="${Y + 2}" width="3" height="3" rx="0.7" fill="${fg}"/>`);
     } else {
       // 겉테두리를 네 조각으로

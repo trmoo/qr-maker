@@ -8,11 +8,13 @@ import { report } from './harness.mjs';
 import qrTests from './qr.test.mjs';
 import payloadTests from './payload.test.mjs';
 import renderTests from './render.test.mjs';
+import canvasTests from './canvas.test.mjs';
 import adviceTests from './advice.test.mjs';
 
 qrTests();
 payloadTests();
 renderTests();
+canvasTests();
 adviceTests();
 
 process.exit(report() ? 0 : 1);
