@@ -10,7 +10,7 @@ import { encodeQR, ECL } from '../lib/qr.js';
 import { TYPES, TYPE_ORDER, buildPayload, defaultValues } from '../lib/payload.js';
 import { drawCanvas, SHAPES, layoutFor } from '../lib/render.js';
 import { scanAdvice, minPrintMm } from '../lib/advice.js';
-import { downloadPNG, downloadSVG, printQR, copyText } from '../lib/download.js';
+import { downloadPNG, downloadSVG, printQR, copyText, copyImage } from '../lib/download.js';
 import { h, fill, note, say } from '../lib/ui.js';
 import { design, saveDesign } from '../lib/store.js';
 
@@ -198,6 +198,21 @@ export function render(root) {
         await downloadPNG(qr, drawOpt);
       },
     }, '⬇ PNG 그림으로'),
+    h('button', {
+      class: 'btn', onclick: async () => {
+        if (!qr) return;
+        const r = await copyImage(qr, drawOpt);
+        if (r === 'ok') {
+          say(drawOpt.transparent
+            ? '그림을 복사했습니다. 붙여넣기(Ctrl+V) 하세요 — 배경이 투명해서 붙이는 곳에 따라 어둡게 보일 수 있습니다.'
+            : '그림을 복사했습니다. 한글·워드·카톡에 붙여넣기(Ctrl+V) 하세요.');
+        } else if (r === 'unsupported') {
+          say('이 브라우저는 그림 복사를 지원하지 않습니다. 「⬇ PNG 그림으로」 받아서 붙여 주세요.');
+        } else {
+          say('그림 복사가 막혀 있습니다. 「⬇ PNG 그림으로」 받아서 붙여 주세요.');
+        }
+      },
+    }, '📋 그림 복사'),
     h('button', { class: 'btn', onclick: () => qr && downloadSVG(qr, drawOpt) }, '⬇ SVG(인쇄용)'),
     h('button', {
       class: 'btn', onclick: () => {

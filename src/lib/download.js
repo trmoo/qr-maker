@@ -96,3 +96,29 @@ export async function copyText(text) {
     return done;
   }
 }
+
+/**
+ * QR 코드 그림을 글자판(클립보드)에 복사 — 한글·워드·카톡에 바로 붙일 수 있게.
+ *
+ * 받는 PNG 와 **똑같은 그림**이다(`downloadPNG` 와 같은 길을 쓴다).
+ * ⚠ 그림 복사는 브라우저가 거드는 기능이라 되는 곳과 안 되는 곳이 있다.
+ *   파이어폭스는 글만 되고 그림은 안 된다. 그때는 'unsupported' 를 돌려주니
+ *   부르는 쪽에서 「PNG 로 받아 붙이세요」라고 일러 준다.
+ * @returns {Promise<'ok'|'unsupported'|'fail'>}
+ */
+export async function copyImage(qr, opt) {
+  const CI = globalThis.ClipboardItem;
+  if (!navigator.clipboard || !navigator.clipboard.write || typeof CI !== 'function') return 'unsupported';
+
+  const canvas = document.createElement('canvas');
+  drawCanvas(canvas, qr, opt);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) return 'fail';
+
+  try {
+    await navigator.clipboard.write([new CI({ 'image/png': blob })]);
+    return 'ok';
+  } catch {
+    return 'fail';
+  }
+}
